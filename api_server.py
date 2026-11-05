@@ -47,6 +47,30 @@ def minimax(board, turn, me, opp, alpha, beta, depth):
         if beta <= alpha:
             break
     return best
+def best_move(board, me):
+    opp = "X" if me == "O" else "O"
+    scored_moves = []
+    available_moves = [
+        i for i, value in enumerate(board)
+        if value == " "
+    ]
+    for move in available_moves:
+        board[move] = me
+        score = minimax(
+            board,opp,me,opp,-100,100,1
+        )
+        board[move] = " "
+        scored_moves.append((score, move))
+    if not scored_moves:
+        return None
+    best_score = max(score for score, move in scored_moves)
+    best_moves = [
+        move for score, move in scored_moves
+        if score == best_score
+    ]
+    return random.choice(best_moves)
+
+
 
 
   

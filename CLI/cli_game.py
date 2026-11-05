@@ -23,25 +23,47 @@ def display_board(board):
     print("---+---+---")
     print(f" {board[6]} | {board[7]} | {board[8]} ")
     print()
-
-
 def get_move(board, player_name):
     while True:
         try:
             move = int(input(f"{player_name}, enter position (1-9): "))
-
             if move < 1 or move > 9:
                 print("Invalid position. Choose between 1 and 9.")
                 continue
-
             index = move - 1
-
             if board[index] != " ":
                 print("That position is already occupied.")
                 continue
-
             return index
-
         except ValueError:
             print("Please enter a valid number.")
+def play_game(mode, player_name):
+    board = [" "] * 9
+    players = {
+        "X": player_name,
+        "O": "Computer" if mode == "computer" else "Friend"
+    }
+    turn = "X"
+    game_over = False
+    while not game_over:
+        display_board(board)
+        print(f"{players[turn]}'s turn ({turn})")
+        if mode == "computer" and turn == "O":
+            move = computer_move(board)
+            print(f"Computer chooses position {move + 1}")
+        else:
+            move = get_move(board, players[turn])
+        board[move] = turn
+        winner, line = find_winner(board)
+        if winner:
+            display_board(board)
+            print(f"{players[winner]} ({winner}) wins!")
+            game_over = True
+        elif " " not in board:
+            display_board(board)
+            print("It's a draw!")
+            game_over = True
+        else:
+            turn = "O" if turn == "X" else "X"
+
 
