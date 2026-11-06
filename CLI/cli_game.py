@@ -65,5 +65,35 @@ def play_game(mode, player_name):
             game_over = True
         else:
             turn = "O" if turn == "X" else "X"
+def computer_move(board):
+    available_moves = [
+        i for i, value in enumerate(board)
+        if value == " "
+    ]
+    return random.choice(available_moves)
+def main():
+    while True:
+        print("\n========== TIC TAC TOE ==========")
+        print("1. Play with Friend")
+        print("2. Play with Computer")
+        print("3. Quit")
+        choice = input("Enter your choice: ").strip()
+        if choice == "1" or choice == "2":
+            player_name = input("Enter your name: ").strip() or "Player"
+            mode = "friend" if choice == "1" else "computer"
+            play_game(mode, player_name)
+            replay = input(
+                "\nWould you like to play again? (y/n): "
+            ).strip().lower()
+            if replay != "y":
+                print("Thanks for playing!")
+                break
+        elif choice == "3":
+            print("Thanks for playing!")
+            break
+        else:
+            print("Invalid choice. Please select 1, 2, or 3.")
+if __name__ == "__main__":
+    main()
 
 

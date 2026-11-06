@@ -69,7 +69,38 @@ def best_move(board, me):
         if score == best_score
     ]
     return random.choice(best_moves)
+app = Flask(__name__)
 
+@app.get("/api/health")
+def health():
+    return jsonify(status="ok")
+@app.post("/api/move")
+def api_move():
+    data = request.get_json(silent=True) or {}
+    board = data.get("board")
+    computer = data.get("computer", "O")
+    if (
+        not isinstance(board, list)
+        or len(board) != 9
+        or any(value not in (" ", "X", "O") for value in board)
+        or computer not in ("X", "O")
+        or " " not in board
+    ):
+        return jsonify(error="invalid request"), 400
+
+    board = list(board)
+    if winner(board):
+        return jsonify(error="game already finished"), 400
+    move = best_move(board, computer)
+    if move is None:
+        return jsonify(error="no moves available"), 400
+    return jsonify(move=move)
+if __name__ == "__main__":
+    app.run(
+        host="127.0.0.1",
+        port=5000,
+        debug=False
+    )
 
 
 
