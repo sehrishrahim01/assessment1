@@ -51,6 +51,71 @@ class App(tk.Tk):
             width=22,
             command=self.destroy
         ).pack(pady=3)
+def build_game(self):
+        f = self.game_frame
+        self.status = tk.Label(
+            f,
+            text="",
+            font=("Arial", 14)
+        )
+        self.status.pack(pady=(0, 10))
+        grid = tk.Frame(f)
+        grid.pack()
+        self.buttons = []
+        for i in range(9):
+            b = tk.Button(
+                grid,
+                text="",
+                width=4,
+                height=2,
+                font=("Arial", 28, "bold"),
+                command=lambda i=i: self.on_click(i)
+            )
+            b.grid(
+                row=i // 3,
+                column=i % 3,
+                padx=2,
+                pady=2
+            )
+            self.buttons.append(b)
+        bar = tk.Frame(f)
+        bar.pack(pady=(10, 0))
+        tk.Button(
+            bar,
+            text="Restart",
+            command=lambda: self.start(self.mode)
+        ).pack(side="left", padx=5)
+        tk.Button(
+            bar,
+            text="Menu",
+            command=self.show_menu
+        ).pack(side="left", padx=5)
+    def show_menu(self):
+        self.game_frame.pack_forget()
+        self.menu_frame.pack()
+    def start(self, mode):
+        self.mode = mode
+        self.name = self.name_var.get().strip() or "Player"
+        self.p_names = {
+            "X": self.name,
+            "O": "Computer" if mode == "computer" else "Friend"
+        }
+        self.board = [" "] * 9
+        self.turn = "X"
+        self.over = False
 
+        for b in self.buttons:
+            b.config(
+                text="",
+                state="normal",
+                bg="#d9d9d9"
+            )
+        self.menu_frame.pack_forget()
+        self.game_frame.pack()
+        self.update_status()
+    def update_status(self):
+        self.status.config(
+            text=f"{self.p_names[self.turn]}'s turn ({self.turn})"
+        )
 
 
