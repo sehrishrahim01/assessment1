@@ -51,7 +51,7 @@ class App(tk.Tk):
             width=22,
             command=self.destroy
         ).pack(pady=3)
-def build_game(self):
+    def build_game(self):
         f = self.game_frame
         self.status = tk.Label(
             f,
@@ -117,5 +117,59 @@ def build_game(self):
         self.status.config(
             text=f"{self.p_names[self.turn]}'s turn ({self.turn})"
         )
+    def on_click(self, i):
+        if self.over or self.board[i] != " ":
+            return
+        if self.mode == "computer" and self.turn == "O":
+            return
+        self.place(i)
+        if not self.over and self.mode == "computer":
+            self.after(400, self.computer_turn)
 
+    def place(self, i):
+        self.board[i] = self.turn
+
+        self.buttons[i].config(
+            text=self.turn,
+            fg="#d33" if self.turn == "X" else "#33d"
+        )
+        w, line = find_winner(self.board)
+
+        if w:
+            self.finish(w, line)
+
+        elif " " not in self.board:
+            self.finish(None, None)
+
+        else:
+            self.turn = "O" if self.turn == "X" else "X"
+            self.update_status()
+
+    def computer_turn(self):
+        if self.over:
+            return
+        available_moves = [
+            i for i, value in enumerate(self.board)
+            if value == " "
+        ]
+        if not available_moves:
+            return
+        move = random.choice(available_moves)
+        self.place(move)
+
+    def finish(self, w, line):
+        self.over = True
+        for b in self.buttons:
+            b.config(state="disabled")
+        if line:
+            for i in line:
+                self.buttons[i].config(bg="#8f8")
+            msg = f"{self.p_names[w]} ({w}) wins!"
+        else:
+            msg = "It's a draw!"
+        self.status.config(text=msg)
+        messagebox.showinfo("Game over", msg)
+
+if __name__ == "__main__":
+    App().mainloop()
 
