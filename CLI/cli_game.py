@@ -1,3 +1,5 @@
+import requests
+from datetime import datetime
 import random
 WIN_LINES = [
     (0, 1, 2), (3, 4, 5), (6, 7, 8),
@@ -14,7 +16,9 @@ def find_winner(board):
             return board[a], line
 
     return None, None
-    
+def save_result(result):
+    with open("game_results.txt", "a") as file:
+        file.write(f"{datetime.now()} - {result}\n")    
 def display_board(board):
     print()
     print(f" {board[0]} | {board[1]} | {board[2]} ")
@@ -50,27 +54,38 @@ def play_game(mode, player_name):
         print(f"{players[turn]}'s turn ({turn})")
         if mode == "computer" and turn == "O":
             move = computer_move(board)
+            if move is None:
+                return
             print(f"Computer chooses position {move + 1}")
         else:
             move = get_move(board, players[turn])
         board[move] = turn
         winner, line = find_winner(board)
         if winner:
-            display_board(board)
-            print(f"{players[winner]} ({winner}) wins!")
-            game_over = True
+             display_board(board)
+             result = f"{players[winner]} ({winner}) wins!"
+             print(result)
+             save_result(result)
+             game_over = True
         elif " " not in board:
             display_board(board)
             print("It's a draw!")
+            save_result("It's a draw!")
             game_over = True
         else:
             turn = "O" if turn == "X" else "X"
 def computer_move(board):
-    available_moves = [
-        i for i, value in enumerate(board)
-        if value == " "
-    ]
-    return random.choice(available_moves)
+    try:
+        response = requests.post(
+            "http://127.0.0.1:5000/api/move",
+            json={"board": board,"computer": "O"},
+            timeout=5
+        )
+        response.raise_for_status()
+        return response.json()["move"]
+    except requests.RequestException:
+        print("Error: Flask API is not running.")
+        return None
 def main():
     while True:
         print("\n========== TIC TAC TOE ==========")
@@ -95,5 +110,3 @@ def main():
             print("Invalid choice. Please select 1, 2, or 3.")
 if __name__ == "__main__":
     main()
-
-
