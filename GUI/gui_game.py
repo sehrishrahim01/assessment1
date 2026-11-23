@@ -1,6 +1,8 @@
 import random
 import tkinter as tk
 from tkinter import messagebox
+import requests
+from datetime import datetime
 WIN_LINES = [
     (0, 1, 2), (3, 4, 5), (6, 7, 8),
     (0, 3, 6), (1, 4, 7), (2, 5, 8),
@@ -12,6 +14,9 @@ def find_winner(board):
         if board[a] != " " and board[a] == board[b] == board[c]:
             return board[a], line
     return None, None
+def save_result(result):
+    with open("game_results.txt", "a") as file:
+        file.write(f"{datetime.now()} - {result}\n")
 class App(tk.Tk):
     def __init__(self):
         super().__init__()
@@ -146,17 +151,30 @@ class App(tk.Tk):
             self.update_status()
 
     def computer_turn(self):
-        if self.over:
-            return
-        available_moves = [
-            i for i, value in enumerate(self.board)
-            if value == " "
-        ]
-        if not available_moves:
-            return
-        move = random.choice(available_moves)
-        self.place(move)
+      if self.over:
+          return
 
+      try:
+          response = requests.post(
+              "http://127.0.0.1:5000/api/move",
+              json={
+                  "board": self.board,
+                  "computer": "O"
+              },
+              timeout=5
+          )
+
+          response.raise_for_status()
+          move = response.json()["move"]
+
+          self.place(move)
+
+      except (requests.RequestException, ValueError, KeyError):
+          messagebox.showerror(
+              "API Error",
+              "Unable to connect to Flask backend."
+          )
+          self.show_menu()
     def finish(self, w, line):
         self.over = True
         for b in self.buttons:
@@ -168,6 +186,7 @@ class App(tk.Tk):
         else:
             msg = "It's a draw!"
         self.status.config(text=msg)
+        save_result(msg)
         messagebox.showinfo("Game over", msg)
 
 if __name__ == "__main__":
